@@ -23,15 +23,64 @@ const createUser = async (req: Request, res: Response) => {
     });
   }
 };
+
+// get user by id
+const getUserById = async (req: Request, res: Response) => {
+  try {
+    const userId = parseFloat(req.params.id);
+
+    // before get check user exist or not
+    const userCheck = await userServices.getUserByIdFromDB(userId);
+
+    if (!userCheck) {
+      return res.status(404).send({
+        success: false,
+        message: `User with id ${userId} not found`,
+        error: {
+          code: 404,
+          description: "User Not Found",
+        },
+      });
+    }
+    const user = await userServices.getUserByIdFromDB(userId);
+    res.json({
+      success: true,
+      message: `User Retrieved Successfully with id ${userId}`,
+      data: user,
+    });
+  } catch (err: unknown) {
+    res.status(500).send({
+      success: false,
+      message: err.message,
+      error: {
+        code: 500,
+        description: "User Retrieval Failed",
+      },
+    });
+  }
+};
+
 // update user by id
 const updateUserById = async (req: Request, res: Response) => {
   try {
     const userId = parseFloat(req.params.id);
+
+    // before update check user exist or not
+    const userCheck = await userServices.getUserByIdFromDB(userId);
+    if (!userCheck) {
+      return res.status(404).send({
+        success: false,
+        message: `User with id ${userId} not found`,
+        error: {
+          code: 404,
+          description: "User Not Found",
+        },
+      });
+    }
+
     const updatedUserInfo = req.body;
     const validationUserInfo =
       userValidationWithZodSchema.parse(updatedUserInfo);
-
-    // before update check user exist or not
 
     const updatedUser = await userServices.updateUserByIdIntoDB(
       userId,
@@ -56,5 +105,6 @@ const updateUserById = async (req: Request, res: Response) => {
 
 export const userController = {
   createUser,
+  getUserById,
   updateUserById,
 };

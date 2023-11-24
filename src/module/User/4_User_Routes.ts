@@ -6,6 +6,7 @@ const router: Router = express.Router();
 // post route
 router
   .post("/", userController.createUser)
-  .put("/:id", userController.updateUserById);
+  .put("/:id", userController.updateUserById)
+  .get("/:id", userController.getUserById);
 
 export const UserRouter = router;

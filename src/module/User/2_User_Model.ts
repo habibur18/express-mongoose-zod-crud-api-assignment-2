@@ -136,7 +136,20 @@ UserSchema.post("save", function (doc, next) {
 });
 
 // find user by id use custom static method
-// Todo:
+// Todo: Done
+// 1. find user by id
+// 2. check user exist or not
+// 3. return user
+
+UserSchema.statics.isUserExists = async function (userId: number) {
+  const isUserExists = await User.findOne(
+    { userId },
+    { password: 0, isDeleted: 0, orders: 0, __v: 0 }
+  );
+
+  return isUserExists;
+};
+
 const User = model<TUser, IUserModel>("User", UserSchema);
 
 export default User;

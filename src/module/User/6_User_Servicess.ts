@@ -8,6 +8,12 @@ const createUserIntoDB = async (userData: TUser) => {
   return user;
 };
 
+// get user by id
+const getUserByIdFromDB = async (userId: number) => {
+  const user = await User.isUserExists(userId);
+  return user;
+};
+
 // update user by id
 const updateUserByIdIntoDB = async (userId: number, userData: TUser) => {
   if (userData.password) {
@@ -30,5 +36,6 @@ const updateUserByIdIntoDB = async (userId: number, userData: TUser) => {
 
 export const userServices = {
   createUserIntoDB,
+  getUserByIdFromDB,
   updateUserByIdIntoDB,
 };
