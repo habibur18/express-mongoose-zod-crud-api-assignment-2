@@ -5,6 +5,19 @@ import userValidationWithZodSchema from "./3_User_Validation_Zod";
 const createUser = async (req: Request, res: Response) => {
   try {
     const userInfo = req.body;
+    const userId = parseFloat(userInfo.userId);
+    // before create check user exist or not
+    const userCheck = await userServices.getUserByIdFromDB(userId);
+    if (userCheck) {
+      return res.status(409).send({
+        success: false,
+        message: `User with id ${userInfo.userId} already exists`,
+        error: {
+          code: 409,
+          description: "User Already Exists",
+        },
+      });
+    }
     const validationUserInfo = userValidationWithZodSchema.parse(userInfo);
     const user = await userServices.createUserIntoDB(validationUserInfo);
     res.json({
