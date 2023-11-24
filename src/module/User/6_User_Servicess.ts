@@ -8,6 +8,23 @@ const createUserIntoDB = async (userData: TUser) => {
   return user;
 };
 
+// get a list of all users
+const getAllUsersFromDB = async () => {
+  const users = await User.aggregate([
+    // {$match:{}},
+    {
+      $project: {
+        username: 1,
+        fullName: 1,
+        age: 1,
+        email: 1,
+        address: 1,
+      },
+    },
+  ]);
+  return users;
+};
+
 // get user by id
 const getUserByIdFromDB = async (userId: number) => {
   const user = await User.isUserExists(userId);
@@ -34,8 +51,19 @@ const updateUserByIdIntoDB = async (userId: number, userData: TUser) => {
   return result;
 };
 
+// change user IsDeleted status
+const deleteUserByIdIntoDB = async (userId: number) => {
+  const result = await User.findOneAndUpdate(
+    { userId },
+    { $set: { isDeleted: true } }
+  );
+  return result;
+};
+
 export const userServices = {
   createUserIntoDB,
+  getAllUsersFromDB,
   getUserByIdFromDB,
   updateUserByIdIntoDB,
+  deleteUserByIdIntoDB,
 };

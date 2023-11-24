@@ -6,7 +6,9 @@ const router: Router = express.Router();
 // post route
 router
   .post("/", userController.createUser)
-  .put("/:id", userController.updateUserById)
-  .get("/:id", userController.getUserById);
+  .get("/", userController.getAllUsers)
+  .get("/:userId", userController.getUserById)
+  .put("/:userId", userController.updateUserById)
+  .delete("/:userId", userController.deleteUserById);
 
 export const UserRouter = router;

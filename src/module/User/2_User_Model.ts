@@ -135,6 +135,18 @@ UserSchema.post("save", function (doc, next) {
   next();
 });
 
+// hide user IsDeleted status true and only allow IsDeleted status is false
+UserSchema.pre("findOne", async function (next) {
+  this.findOne({ isDeleted: false });
+  next();
+});
+
+// hide user IsDeleted status is true in aggregate and only allow IsDeleted status is false
+UserSchema.pre("aggregate", async function (next) {
+  this.pipeline().unshift({ $match: { isDeleted: false } });
+  next();
+});
+
 // find user by id use custom static method
 // Todo: Done
 // 1. find user by id

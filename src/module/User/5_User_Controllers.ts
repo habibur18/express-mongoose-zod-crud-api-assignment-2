@@ -37,10 +37,31 @@ const createUser = async (req: Request, res: Response) => {
   }
 };
 
+// get all users list
+const getAllUsers = async (req: Request, res: Response) => {
+  try {
+    const users = await userServices.getAllUsersFromDB();
+    res.json({
+      success: true,
+      message: "Users Retrieved Successfully",
+      data: users,
+    });
+  } catch (err: unknown) {
+    res.status(500).send({
+      success: false,
+      message: err.message,
+      error: {
+        code: 500,
+        description: "Users Retrieval Failed",
+      },
+    });
+  }
+};
+
 // get user by id
 const getUserById = async (req: Request, res: Response) => {
   try {
-    const userId = parseFloat(req.params.id);
+    const userId = parseFloat(req.params.userId);
 
     // before get check user exist or not
     const userCheck = await userServices.getUserByIdFromDB(userId);
@@ -76,7 +97,7 @@ const getUserById = async (req: Request, res: Response) => {
 // update user by id
 const updateUserById = async (req: Request, res: Response) => {
   try {
-    const userId = parseFloat(req.params.id);
+    const userId = parseFloat(req.params.userId);
 
     // before update check user exist or not
     const userCheck = await userServices.getUserByIdFromDB(userId);
@@ -116,8 +137,44 @@ const updateUserById = async (req: Request, res: Response) => {
   }
 };
 
+// change user IsDeleted status
+const deleteUserById = async (req: Request, res: Response) => {
+  try {
+    const userId = parseFloat(req.params.userId);
+    // before delete check user exist or not
+    const userCheck = await userServices.getUserByIdFromDB(userId);
+    if (!userCheck) {
+      return res.status(404).send({
+        success: false,
+        message: `User with id ${userId} not found`,
+        error: {
+          code: 404,
+          description: "User Not Found",
+        },
+      });
+    }
+    const deletedUser = await userServices.deleteUserByIdIntoDB(userId);
+    res.json({
+      success: true,
+      message: "User deleted successfully",
+      data: null,
+    });
+  } catch (err: unknown) {
+    res.status(500).send({
+      success: false,
+      message: err.message,
+      error: {
+        code: 500,
+        description: "User Deletion Failed",
+      },
+    });
+  }
+};
+
 export const userController = {
   createUser,
+  getAllUsers,
   getUserById,
   updateUserById,
+  deleteUserById,
 };
