@@ -2,6 +2,7 @@ import { Schema, model, connect } from "mongoose";
 import bcrypt from "bcrypt";
 import { IUserModel, TAddress, TOrder, TUser } from "./1_User_Interface";
 import { string } from "zod";
+import Config from "../../app/Config";
 
 const fullNameSchema = new Schema(
   {
@@ -67,7 +68,7 @@ const ordersSchema = new Schema<TOrder>(
   }
 );
 
-const userSchema = new Schema<TUser, IUserModel>({
+const UserSchema = new Schema<TUser, IUserModel>({
   userId: {
     type: Number,
     trim: true,
@@ -116,6 +117,26 @@ const userSchema = new Schema<TUser, IUserModel>({
   },
 });
 
-const User = model<TUser, IUserModel>("User", userSchema);
+// use hook method to hash password before saving
+UserSchema.pre("save", async function (next) {
+  if (this.password) {
+    this.password = await bcrypt.hash(
+      this.password,
+      Number(Config.BCRYPT_SALT_ROUNDS)
+    );
+  }
+  next();
+});
+
+// change the password shape to * and replace password length into *
+UserSchema.post("save", function (doc, next) {
+  const passwordLength = doc.password.length;
+  doc.password = "*".repeat(passwordLength);
+  next();
+});
+
+// find user by id use custom static method
+// Todo:
+const User = model<TUser, IUserModel>("User", UserSchema);
 
 export default User;
