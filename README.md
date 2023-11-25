@@ -29,7 +29,8 @@
 
 - EndPoint: POST /api/users
 - Request Body:
-  ````{
+  ````
+  {
    "userId": "number",
    "username": "string",
    "password": "string",
@@ -56,7 +57,8 @@
 
 - Response: Newly created user object. Password is not included in the response data.
 
-```{
+```
+{
     "success": true,
     "message": "User created successfully!",
     "data": {
@@ -87,7 +89,8 @@
 - Endpost: Endpoint: GET /api/users
 - Response: List of user objects. Each object only contain username, fullName, age, email, address.
 
-```{
+```
+{
     "success": true,
     "message": "Users fetched successfully!",
     "data": [
@@ -115,7 +118,8 @@
 - Endpoint: GET /api/users/:userId
 - Response: User object and the password field is not included in the response data. And if user not found then give error sample error down.
 
-```{
+```
+{
     "success": true,
     "message": "User fetched successfully!",
     "data": {
@@ -178,7 +182,8 @@
 - Endpoint: DELETE /api/users/:userId
 - Response: Success message or, If can't find information about the user, then it will show a clear message. I had use customs statics method to check user existence.
 
-```{
+```
+{
 	"success": true,
 	"message": "User deleted successfully!",
 	"data" : null
@@ -186,3 +191,88 @@
 ```
 
 # ##Order management part-2
+
+## 1. Add New Product in Order
+
+- Endpoint: PUT /api/users/:userId/orders
+
+- Request Body: If can't find information about the user, then it will show a clear message. Used static method to display this error message. (Used the format for error messages that is given below.)
+
+```
+{
+    "productName": "string",
+    "price": "number",
+    "quantity": "number"
+}
+```
+
+- Response:
+-
+
+```
+{
+   "success": true,
+   "message": "Order created successfully!",
+   "data": null
+}
+```
+
+## 2. Retrieve all orders for a specific user
+
+- Endpoint: GET /api/users/:userId/orders
+- Request Body: If can't find information about the user, then it will show a clear message. Used static method to display this error message. (Used the format for error messages that is given below.)
+- Response:
+
+```
+{
+    "success": true,
+    "message": "Order fetched successfully!",
+    "data": {
+        "orders": [
+            {
+                "productName": "Product 1",
+                "price": 23.56,
+                "quantity": 2
+            },
+            {
+                "productName": "Product 2",
+                "price": 23.56,
+                "quantity": 5
+            }
+        ]
+    }
+}
+```
+
+## 3. Calculate Total Price of Orders for a Specific User
+
+- Endpoint: GET /api/users/:userId/orders/total-price
+- Request Body: If can't find information about the user, then it will show a clear message. Used static method to display this error message. (Used the format for error messages that is given below.)
+- Response:
+
+```
+{
+    "success": true,
+    "message": "Total price calculated successfully!",
+    "data": {
+        "totalPrice": 454.32
+    }
+}
+```
+
+# Sample Error Message:
+
+```
+{
+    "success": false,
+    "message": "User not found",
+    "error": {
+        "code": 404,
+        "description": "User not found!"
+    }
+}
+```
+
+# That all about the crud App
+
+#### Thanks for reading!
