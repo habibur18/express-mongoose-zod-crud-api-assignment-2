@@ -11,4 +11,9 @@ router
   .put("/:userId", userController.updateUserById)
   .delete("/:userId", userController.deleteUserById);
 
+// user order api
+router
+  .post("/:userId/orders", userController.createOrder)
+  .get("/:userId/orders", userController.getOrdersById);
+
 export const UserRouter = router;

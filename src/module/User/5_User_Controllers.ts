@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import { userServices } from "./6_User_Servicess";
-import userValidationWithZodSchema from "./3_User_Validation_Zod";
+import userValidationWithZodSchema, {
+  orderValidationWithSchema,
+} from "./3_User_Validation_Zod";
 
 const createUser = async (req: Request, res: Response) => {
   try {
@@ -20,10 +22,12 @@ const createUser = async (req: Request, res: Response) => {
     }
     const validationUserInfo = userValidationWithZodSchema.parse(userInfo);
     const user = await userServices.createUserIntoDB(validationUserInfo);
+    // remove pasword isDeleted and _id, orders and __v
+    const { password, isDeleted, orders, _id, __v, ...rest } = user.toJSON();
     res.json({
       success: true,
-      message: "User created successfully",
-      data: user,
+      message: "User created successfully!",
+      data: rest,
     });
   } catch (err: unknown) {
     res.status(500).send({
@@ -43,7 +47,7 @@ const getAllUsers = async (req: Request, res: Response) => {
     const users = await userServices.getAllUsersFromDB();
     res.json({
       success: true,
-      message: "Users Retrieved Successfully",
+      message: "Users fetched successfully!",
       data: users,
     });
   } catch (err: unknown) {
@@ -88,7 +92,7 @@ const getUserById = async (req: Request, res: Response) => {
       message: err.message,
       error: {
         code: 500,
-        description: "User Retrieval Failed",
+        description: "User fetch Failed",
       },
     });
   }
@@ -122,7 +126,7 @@ const updateUserById = async (req: Request, res: Response) => {
     );
     res.json({
       success: true,
-      message: "User updated successfully",
+      message: "User updated successfully!",
       data: updatedUser,
     });
   } catch (err: unknown) {
@@ -171,10 +175,88 @@ const deleteUserById = async (req: Request, res: Response) => {
   }
 };
 
+// order management
+const createOrder = async (req: Request, res: Response) => {
+  try {
+    const orderInfo = req.body;
+    const userId = parseFloat(req.params.userId);
+
+    // before create check user exist or not
+    const userCheck = await userServices.getUserByIdFromDB(userId);
+    if (!userCheck) {
+      return res.status(404).send({
+        success: false,
+        message: `User with id ${userId} not found`,
+        error: {
+          code: 404,
+          description: "User Not Found",
+        },
+      });
+    }
+    const validationOrderInfo = orderValidationWithSchema.parse(orderInfo);
+    const createdOrder = await userServices.createOrderIntoDB(
+      userId,
+      validationOrderInfo
+    );
+    res.json({
+      success: true,
+      message: "Order created successfully!",
+      data: null,
+    });
+  } catch (err: unknown) {
+    res.status(500).send({
+      success: false,
+      message: err.message,
+      error: {
+        code: 500,
+        description: "Order Creation Failed",
+      },
+    });
+  }
+};
+
+// get a specific orders by user id
+const getOrdersById = async (req: Request, res: Response) => {
+  const userId = parseFloat(req.params.userId);
+
+  // before get check user exist or not
+  const userCheck = await userServices.getUserByIdFromDB(userId);
+  if (!userCheck) {
+    return res.status(404).send({
+      success: false,
+      message: `User with id ${userId} not found`,
+      error: {
+        code: 404,
+        description: "User Not Found",
+      },
+    });
+  }
+  const orders = await userServices.getOrdersOfUserById(userId);
+  // check orders empty or not
+  if (!orders) {
+    return res.status(404).send({
+      success: false,
+      message: `User with id ${userId} has no orders`,
+      error: {
+        code: 404,
+        description: "User has no orders",
+      },
+    });
+  }
+  res.json({
+    success: true,
+    message: "Orders fetched successfully!",
+    data: orders,
+  });
+};
+
 export const userController = {
   createUser,
   getAllUsers,
   getUserById,
   updateUserById,
   deleteUserById,
+  // user orders management
+  createOrder,
+  getOrdersById,
 };

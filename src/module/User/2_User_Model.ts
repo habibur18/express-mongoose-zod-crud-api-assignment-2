@@ -115,6 +115,9 @@ const UserSchema = new Schema<TUser, IUserModel>({
     type: Boolean,
     default: false,
   },
+  __v: {
+    type: Number,
+  },
 });
 
 // use hook method to hash password before saving
@@ -134,6 +137,13 @@ UserSchema.post("save", function (doc, next) {
   doc.password = "*".repeat(passwordLength);
   next();
 });
+
+// hide password feild from response
+UserSchema.methods.toJSON = function () {
+  const userObject = this.toObject();
+  delete userObject.password;
+  return userObject;
+};
 
 // hide user IsDeleted status true and only allow IsDeleted status is false
 UserSchema.pre("findOne", async function (next) {

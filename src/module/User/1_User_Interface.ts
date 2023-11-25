@@ -28,6 +28,7 @@ export interface TUser {
   address: TAddress;
   orders?: TOrder[];
   isDeleted?: boolean;
+  __v?: number;
 }
 
 export interface IUserModel extends Model<TUser> {
