@@ -76,7 +76,26 @@ const createOrderIntoDB = async (userId: number, orderData: TOrder) => {
 // retrive all orders for a specific user
 const getOrdersOfUserById = async (userId: number) => {
   const result = await User.findOne({ userId }, { orders: 1, _id: 0 });
-  console.log("from db", result);
+  // console.log("from db", result);
+  return result;
+};
+
+// calculate total amount of user's orders with aggregate pipeline
+const calculateTotalAmountOfOrders = async (userId: number) => {
+  const result = await User.aggregate([
+    { $match: { userId } },
+    { $unwind: "$orders" },
+    {
+      $group: {
+        _id: null,
+        totalPrice: {
+          $sum: { $multiply: ["$orders.price", "$orders.quantity"] },
+        },
+      },
+    },
+    { $project: { _id: 0, totalPrice: 1 } },
+  ]);
+
   return result;
 };
 
@@ -89,4 +108,5 @@ export const userServices = {
   // order management
   createOrderIntoDB,
   getOrdersOfUserById,
+  calculateTotalAmountOfOrders,
 };

@@ -217,37 +217,96 @@ const createOrder = async (req: Request, res: Response) => {
 
 // get a specific orders by user id
 const getOrdersById = async (req: Request, res: Response) => {
-  const userId = parseFloat(req.params.userId);
+  try {
+    const userId = parseFloat(req.params.userId);
 
-  // before get check user exist or not
-  const userCheck = await userServices.getUserByIdFromDB(userId);
-  if (!userCheck) {
-    return res.status(404).send({
+    // before get check user exist or not
+    const userCheck = await userServices.getUserByIdFromDB(userId);
+    if (!userCheck) {
+      return res.status(404).send({
+        success: false,
+        message: `User with id ${userId} not found`,
+        error: {
+          code: 404,
+          description: "User Not Found",
+        },
+      });
+    }
+    const orders = await userServices.getOrdersOfUserById(userId);
+    // check orders empty or not
+    if (!orders || !orders.orders || orders.orders.length === 0) {
+      return res.status(404).send({
+        success: false,
+        message: `User with id ${userId} has no orders`,
+        error: {
+          code: 404,
+          description: "User has no orders",
+        },
+      });
+    }
+    res.json({
+      success: true,
+      message: "Orders fetched successfully!",
+      data: orders,
+    });
+  } catch (error) {
+    res.status(500).send({
       success: false,
-      message: `User with id ${userId} not found`,
+      message: error.message,
       error: {
-        code: 404,
-        description: "User Not Found",
+        code: 500,
+        description: "Orders Retrieval Failed",
       },
     });
   }
-  const orders = await userServices.getOrdersOfUserById(userId);
-  // check orders empty or not
-  if (!orders) {
-    return res.status(404).send({
+};
+
+// calculate total order price
+const calculateTotalAmountOfOrders = async (req: Request, res: Response) => {
+  try {
+    const userId = parseFloat(req.params.userId);
+    // 1 ) before calculate process check user exist or not
+    const userCheck = await userServices.getUserByIdFromDB(userId);
+    if (!userCheck) {
+      return res.status(404).send({
+        success: false,
+        message: `User with id ${userId} not found`,
+        error: {
+          code: 404,
+          description: "User Not Found",
+        },
+      });
+    }
+
+    // 2) check user orders empty or not
+    const orders = await userServices.getOrdersOfUserById(userId);
+    if (!orders || !orders.orders || orders.orders.length === 0) {
+      return res.status(404).send({
+        success: false,
+        message: `User with id ${userId} has no orders`,
+        error: {
+          code: 404,
+          description: "User has no orders",
+        },
+      });
+    }
+    // step 3 calculate total amount
+    const totalAmount = await userServices.calculateTotalAmountOfOrders(userId);
+    res.json({
+      success: true,
+      message: "Total price calculated successfully!",
+      data: totalAmount,
+    });
+  } catch (error) {
+    res.status(500).send({
       success: false,
-      message: `User with id ${userId} has no orders`,
+      message: error.message,
       error: {
-        code: 404,
-        description: "User has no orders",
+        code: 500,
+        description: "Orders Calculation Failed",
       },
     });
   }
-  res.json({
-    success: true,
-    message: "Orders fetched successfully!",
-    data: orders,
-  });
 };
 
 export const userController = {
@@ -259,4 +318,5 @@ export const userController = {
   // user orders management
   createOrder,
   getOrdersById,
+  calculateTotalAmountOfOrders,
 };

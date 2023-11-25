@@ -14,6 +14,10 @@ router
 // user order api
 router
   .post("/:userId/orders", userController.createOrder)
-  .get("/:userId/orders", userController.getOrdersById);
+  .get("/:userId/orders", userController.getOrdersById)
+  .get(
+    "/:userId/orders/total-price",
+    userController.calculateTotalAmountOfOrders
+  );
 
 export const UserRouter = router;
